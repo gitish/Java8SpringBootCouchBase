@@ -14,14 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.couchbase.client.CouchbaseClient;
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.view.ViewQuery;
 import com.couchbase.client.java.view.ViewResult;
 import com.couchbase.client.java.view.ViewRow;
-import com.couchbase.client.protocol.views.AbstractView;
-import com.couchbase.client.protocol.views.Query;
-import com.couchbase.client.protocol.views.View;
 import com.google.gson.Gson;
 import com.shl.pojo.Price;
 
