@@ -45,7 +45,6 @@ public class PriceController {
 			prices.add(p);
 		}
 		return prices;
-		
 	}
 	
 	
@@ -67,5 +66,15 @@ public class PriceController {
 		}
 		return "Failure";
 	}
-
+	
+	@RequestMapping(value = "price/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public String delete(@RequestBody Price price) {
+		try {
+			return client.delete(price.getPartNumber()+"").get()?"Success":"Failure";
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		return "Failure";
+	}
 }
