@@ -36,7 +36,11 @@ public class PriceController {
 
 	@Autowired
 	Bucket bucket;
-
+	
+	/**
+	 * This service is used to return entire list of prices
+	 * @return List<Price>
+	 */
 	@RequestMapping("/price")
 	public List<Price> getAllPrice() {
 		ViewResult result = bucket.query(ViewQuery
@@ -52,7 +56,7 @@ public class PriceController {
 	 * This method is used to return the price between given range
 	 * @param min
 	 * @param max
-	 * @return
+	 * @return List<Price>
 	 */
 	@RequestMapping("/priceRange")
 	public List<Price> getPriceBetween(@Param(value = "min") Double min,@Param(value="max") Double max){
@@ -76,6 +80,10 @@ public class PriceController {
 		}
 	}
 	
+	/**
+	 * This service is used to return a speicfic prices associate with given partNumber
+	 * @return Price
+	 */
 	@RequestMapping("/price/{partNumber}")
 	public Price getPrice(@PathVariable int partNumber) {
 		Gson g = new Gson();
@@ -83,6 +91,10 @@ public class PriceController {
 		return p;
 	}
 
+	/**
+	 * This service is used to add new price to couchbase
+	 * @return Success/Failure
+	 */
 	@RequestMapping(value = "price/add", method = RequestMethod.POST)
 	@ResponseBody
 	public String create(@RequestBody Price price) {
@@ -96,6 +108,10 @@ public class PriceController {
 		return "Failure";
 	}
 
+	/**
+	 * This service is used to delete price with given partNumber
+	 * @return Success/Failure
+	 */
 	@RequestMapping(value = "price/delete", method = RequestMethod.POST)
 	@ResponseBody
 	public String delete(@RequestBody Price price) {
