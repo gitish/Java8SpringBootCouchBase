@@ -1,6 +1,7 @@
 package com.shl.rest.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
@@ -20,6 +21,7 @@ import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.view.ViewQuery;
 import com.couchbase.client.java.view.ViewResult;
 import com.google.gson.Gson;
+import com.shl.constant.ProductCons;
 import com.shl.pojo.Price;
 
 /**
@@ -37,18 +39,34 @@ public class PriceController {
 	@Autowired
 	Bucket bucket;
 	
+	
 	/**
 	 * This service is used to return entire list of prices
 	 * @return List<Price>
 	 */
 	@RequestMapping("/price")
-	public List<Price> getAllPrice() {
+	public Map<String, Price> getAllPrice() {
+		List<Price> prices = getPrices();
+		return getMapedPrice(prices);
+				
+	}
+
+
+	private Map<String, Price> getMapedPrice(List<Price> prices) {
+		Map<String, Price> priceMap= prices.stream()
+				.collect(Collectors.toMap(p->p.getPartNumber()+"", p->p));
+		return priceMap;
+	}
+
+
+	private List<Price> getPrices() {
 		ViewResult result = bucket.query(ViewQuery
 				.from("dev_price", "allPrice"));
 		Gson g = new Gson();
-		return result.allRows().stream()
+		List<Price> prices= result.allRows().stream()
 				.map(row -> g.fromJson(row.value().toString(), Price.class))
 				.collect(Collectors.toList());
+		return prices;
 	}
 	
 
@@ -59,24 +77,26 @@ public class PriceController {
 	 * @return List<Price>
 	 */
 	@RequestMapping("/priceRange")
-	public List<Price> getPriceBetween(@Param(value = "min") Double min,@Param(value="max") Double max){
+	public Map<String, Price> getPriceBetween(@Param(value = "min") Double min,@Param(value="max") Double max){
 		Optional<Double> optMin = Optional.ofNullable(min);
 		Optional<Double> optMax = Optional.ofNullable(max);
 		Predicate<Price> gtatherThanMin = p -> p.getSalePrice() > min; 
 		Predicate<Price> lessThanMax = p -> p.getSalePrice() < max;
+		
+		
 		if(!optMin.isPresent()){
-			return getAllPrice().stream()
+			return getMapedPrice(getPrices().stream()
 					.filter(lessThanMax)
-					.collect(Collectors.toList());
+					.collect(Collectors.toList()));
 		}else if(!optMax.isPresent()){
-			return getAllPrice().stream()
+			return getMapedPrice(getPrices().stream()
 					.filter(gtatherThanMin)
-					.collect(Collectors.toList());
+					.collect(Collectors.toList()));
 		}else{
-			return getAllPrice().stream()
+			return getMapedPrice(getPrices().stream()
 					.filter(gtatherThanMin)
 					.filter(lessThanMax)
-					.collect(Collectors.toList());
+					.collect(Collectors.toList()));
 		}
 	}
 	
@@ -87,7 +107,7 @@ public class PriceController {
 	@RequestMapping("/price/{partNumber}")
 	public Price getPrice(@PathVariable int partNumber) {
 		Gson g = new Gson();
-		Price p = g.fromJson((String) client.get(partNumber + ""), Price.class);
+		Price p = g.fromJson((String) client.get(ProductCons.PRICE_PREFIX+partNumber), Price.class);
 		return p;
 	}
 
@@ -100,7 +120,7 @@ public class PriceController {
 	public String create(@RequestBody Price price) {
 		Gson g = new Gson();
 		try {
-			return client.add(price.getPartNumber() + "", g.toJson(price))
+			return client.add(ProductCons.PRICE_PREFIX+price.getPartNumber(), g.toJson(price))
 					.get() ? "Success" : "Failure";
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();

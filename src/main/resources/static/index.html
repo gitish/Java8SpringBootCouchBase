@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html lang="en">
+<!--<![endif]-->
+<head>
+
+<!-- Basic Page Needs  ================================================== -->
+<meta charset="utf-8" />
+<title>eMart</title>
+<meta name="description" content="" />
+<meta name="author" content="" />
+
+<!-- Mobile Specific Metas  ================================================== -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<!-- CSS  ================================================== -->
+<link
+	href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,700,600'
+	rel='stylesheet' type='text/css' />
+<link rel="stylesheet" href="stylesheets/base.css" />
+<link rel="stylesheet" href="stylesheets/skeleton.css" />
+<link rel="stylesheet" href="stylesheets/layout.css" />
+<link rel="stylesheet" href="stylesheets/responsivemobilemenu.css" />
+<link rel="stylesheet" href="stylesheets/flexslider.css" />
+<link rel="stylesheet" href="stylesheets/jquery/jquery-ui.css">
+<link rel="stylesheet" href="stylesheets/style.css">
+<!-- JS	  ================================================== -->
+
+<script type="text/javascript" src="javascripts/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="javascripts/jquery-ui.min.js"></script>
+<script type="text/javascript" src="javascripts/responsivemobilemenu.js"></script>
+<script type="text/javascript" src="javascripts/jquery.flexslider.js"></script>
+<script type="text/javascript" src="javascripts/jquery.easing.1.3.js"></script>
+<script type="text/javascript" src="javascripts/jquery.prettyPhoto.js"></script>
+<script type="text/javascript" src="javascripts/jquery.quicksand.js"></script>
+<script type="text/javascript"
+	src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+<!-- <script type="text/javascript" src="javascripts/script.js"></script>
+ -->
+<!-- SMOOTH SCROLLING -->
+<script type="text/javascript" src="javascripts/smoothscroll.js"></script>
+
+<!-- Favicons
+		================================================== -->
+<link rel="shortcut icon" href="images/favicon.ico" />
+</head>
+<body>
+	<!-- Primary Page Layout
+	================================================== -->
+	<div class="top">
+		<a href="#home"><img id="rotate" src="./images/top.png" width="70"
+			height="70" alt="top" /></a>
+	</div>
+
+	<header>
+		<div class="container nav" id="home">
+			<div class="three columns logo center">
+				<img src="./images/logo.jpg" />
+			</div>
+		</div>
+	</header>
+
+	<div class="slider" id="home">
+		<div class="container">
+			<!--  SLIDESHOW -->
+			<div class="flexslider">
+				<ul class="slides" id="productContainer">
+					<!--  product info will be displayed dynamically -->
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div id="dvPopUp"></div>
+	<footer>
+		<div class="container">
+			<div class="sixteen columns copyright">
+				<p class="white">
+					Copyright 2016 <a href="http://www.emart.com"> eMart </a>all rights
+					reserved
+				</p>
+			</div>
+		</div>
+	</footer>
+
+
+	<!-- End Document ================================================== -->
+
+	<script type="text/javascript" charset="utf-8">
+		$(document).ready(function() {
+			$("a[rel^='prettyPhoto']").prettyPhoto({
+				social_tools : false,
+				theme : 'light_square'
+			});
+		});
+	</script>
+	<script id="productTemplate" type="text/x-jQuery-tmpl">
+		<li data-dcsc="${description}">
+			<div class="columns three">
+		    	<p class="center"><img class="scale-with-grid" src="images/flexslider/${primaryImage}" alt="logo big"/></p>
+		       	<span class="title white three">${title}</span>
+				<span class="white three">Base Price : ${price.marketPrice}</span> 
+				<span class="white three">Sales Price: ${price.salePrice}</span>
+		       
+				<span class="white button">Add 2 Cart</span>
+		    </div>
+		</li>
+	</script>
+
+	<script type="text/javascript">
+		// Create an array of books
+		var mergeProductPrice=function(product,price){
+			$.each(product,function(i,p){
+				p.price=price[p.partNumber];
+			})
+			return product;
+		}
+		$("#productContainer").on("hover","li",function(){
+			alert($(this).data("dcsc"));
+		})
+		$.ajax({
+			url : "/prodInfo",
+			type : "get",
+			success : function(product) {
+				$.ajax({
+					url : "/price",
+					type : "get",
+					success : function(price) {
+						var jsonresult=mergeProductPrice(product,price);
+						$("#productTemplate").tmpl(jsonresult).appendTo("#productContainer");
+					}
+				});
+			}
+		});
+	</script>
+</body>
+</html>
